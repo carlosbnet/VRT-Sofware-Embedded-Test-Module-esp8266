@@ -52,7 +52,7 @@ DynamicJsonDocument GPSModule::createJson(){
 
 
 void GPSModule::customDelay(uint32_t MS){
- 
+
   unsigned long start = millis();
 
     do

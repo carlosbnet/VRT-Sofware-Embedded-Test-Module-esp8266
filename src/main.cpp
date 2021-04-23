@@ -16,42 +16,50 @@ São eles:
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
 
 //Add Modules
 #include "GPSModule.h"
 #include "BMPModule.h"
 #include "MPUModule.h"
 #include "SDModule.h"
+#include "WIFIModule.h"
 
-GPSModule moduleGPS(D3,D0);
+GPSModule moduleGPS(D3, D0);
 BMPModule moduleBMP;
 MPUModule moduleMPU;
-SDModule  moduleSD(D0);
+SDModule moduleSD(D0);
+WIFIModule moduleWifi;
 
 void setup()
 {
 
   Serial.begin(115200);
+
   moduleGPS.begin();
   moduleBMP.begin();
   moduleMPU.begin();
-  
-   if (!moduleSD.begin())
-    {
-        Serial.println("Card failed, or not present");
-        // don't do anything more:
-        while (1)
-            ;
-    }
-    Serial.println("card initialized."); 
 
+  if (!moduleSD.begin())
+  {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    while (1)
+      ;
+  }
+  Serial.println("card initialized.");
+
+  if (moduleWifi.connect() != WL_CONNECTED)
+  {
+    Serial.print("A conexão não foi estabelecida, por favor apertar botão reset ou aguardar...\n");
+    return;
+  }
 }
 
 void loop()
 {
 
-  const size_t capacity = 4 * JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 9 * JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(6);
-  DynamicJsonDocument doc(capacity);
+  StaticJsonDocument<1024> doc;
 
   JsonObject infor = doc.createNestedObject("modules");
 
@@ -61,10 +69,13 @@ void loop()
 
   infor["mpu"] = moduleMPU.createJson();
 
+  infor["wifi"] = moduleWifi.createJson();
+
   serializeJsonPretty(doc, Serial);
 
   moduleSD.dataSave(doc);
 
   delay(1000);
-  
+
+  moduleWifi.checkConnection();
 }
