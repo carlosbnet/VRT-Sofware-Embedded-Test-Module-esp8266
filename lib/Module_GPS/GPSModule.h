@@ -9,7 +9,7 @@
 #define DEFAULT_RX_PIN  10
 #define DEFAULT_TX_PIN  9
 #define DEFAULT_BAUD_RATE  9600
-#define DEFAULT_DELAY_MS 1000
+#define DEFAULT_DELAY_MS 80
 #define DEFAULT_SERIAL_PORT 0
 #define DEFAULT_SOFTWARECONFIG SWSERIAL_8N1
 
@@ -44,7 +44,6 @@ public:
 
     void headerGps();
     DynamicJsonDocument buildJson();
-    void createJsonChild(JsonObject jsonObject);
     void customDelay(uint32_t MS);
     DynamicJsonDocument createJson();
 

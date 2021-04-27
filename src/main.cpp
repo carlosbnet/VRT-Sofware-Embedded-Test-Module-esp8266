@@ -17,6 +17,7 @@ São eles:
 #include <SPI.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 
 //Add Modules
 #include "GPSModule.h"
@@ -31,6 +32,21 @@ MPUModule moduleMPU;
 SDModule moduleSD(D0);
 WIFIModule moduleWifi;
 
+long firstTime = 0;
+long lastTime = 0;
+long firstTimeMPU = 0;
+long lastTimeMPU = 0;
+long firstTimeGPS = 0;
+long lastTimeGPS = 0;
+long firstTimeBMP = 0;
+long lastTimeBMP = 0;
+long firstTimeWifi = 0;
+long lastTimeWifi = 0;
+long lastTimePost = 0;
+long firstTimePost = 0;
+long lastTimeSD = 0;
+long firstTimeSD = 0;
+
 void setup()
 {
 
@@ -39,6 +55,7 @@ void setup()
   moduleGPS.begin();
   moduleBMP.begin();
   moduleMPU.begin();
+  moduleWifi.begin();
 
   if (!moduleSD.begin())
   {
@@ -59,23 +76,52 @@ void setup()
 void loop()
 {
 
+  firstTime = millis();
+
   StaticJsonDocument<1024> doc;
 
-  JsonObject infor = doc.createNestedObject("modules");
+  firstTimeGPS = millis();
+  doc["moduleGps"] = moduleGPS.createJson();
+  lastTimeGPS = millis();
 
-  infor["gps"] = moduleGPS.createJson();
+  firstTimeBMP = millis();
+  doc["moduleBmp"] = moduleBMP.createJson();
+  lastTimeBMP = millis();
 
-  infor["bmp"] = moduleBMP.createJson();
+  firstTimeMPU = millis();
+  doc["moduleMpu"] = moduleMPU.createJson();
+  lastTimeMPU = millis();
 
-  infor["mpu"] = moduleMPU.createJson();
+  firstTimeWifi = millis();
+  doc["moduleWifi"] = moduleWifi.createJson();
+  lastTimeWifi = millis();
 
-  infor["wifi"] = moduleWifi.createJson();
-
-  serializeJsonPretty(doc, Serial);
-
+  firstTimeSD = millis();
   moduleSD.dataSave(doc);
+  lastTimeSD = millis();
 
-  delay(1000);
+  firstTimePost = millis();
+  moduleWifi.sendData(doc);
+  lastTimePost = millis();
 
   moduleWifi.checkConnection();
+
+  lastTime = millis();
+
+  Serial.println("--------------------------------------------------------------");
+  Serial.print("Tempo de execução geral: ");
+  Serial.println(lastTime - firstTime);
+  Serial.print("Tempo de execução GPS: ");
+  Serial.println(lastTimeGPS - firstTimeGPS);
+  Serial.print("Tempo de execução BMP: ");
+  Serial.println(lastTimeBMP - firstTimeBMP);
+  Serial.print("Tempo de execução MPU: ");
+  Serial.println(lastTimeMPU - firstTimeMPU);
+  Serial.print("Tempo de execução WIFI: ");
+  Serial.println(lastTimeWifi - firstTimeWifi);
+  Serial.print("Tempo de execução Post: ");
+  Serial.println(lastTimePost - firstTimePost);
+  Serial.print("Tempo de execução SD: ");
+  Serial.println(lastTimeSD - firstTimeSD);
+  Serial.println("--------------------------------------------------------------");
 }

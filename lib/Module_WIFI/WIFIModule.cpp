@@ -2,11 +2,32 @@
 #include "WIFIModule.h"
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
+#include <WiFiClient.h>
 
 WIFIModule::WIFIModule()
 {
   _ssid = SSID_DEFAULT;
   _pass = PASS_DEFAULT;
+}
+
+WIFIModule::WIFIModule(char *ssid, char *pass)
+{
+  _ssid = ssid;
+  _pass = pass;
+}
+
+void WIFIModule::begin()
+{
+
+  host = HOST_DEFAULT;
+  path = PATH_DEFAULT;
+}
+
+void WIFIModule::begin(char *host, char *path)
+{
+
+  this->host = host;
+  this->path = path;
 }
 
 uint8_t WIFIModule::connect()
@@ -49,53 +70,60 @@ void WIFIModule::checkConnection()
   }
 }
 
+DynamicJsonDocument WIFIModule::createJson()
+{
 
-DynamicJsonDocument WIFIModule::createJson(){
- 
   DynamicJsonDocument build = this->buildJson();
 
-    return build;
+  return build;
 }
 
+DynamicJsonDocument WIFIModule::buildJson()
+{
 
-
-
-DynamicJsonDocument WIFIModule::buildJson(){
-
-StaticJsonDocument<192> doc;
-        
-//Cria o PAI 
-    JsonObject infor_WIFI =  doc.createNestedObject("infor_WIFI");
-
-//Criar os Filhos
-
-this->createJsonChild(infor_WIFI);
-
-//For debug
-//serializeJsonPretty(doc, Serial);
-
-return doc;
-
-}
-
-void WIFIModule::createJsonChild(JsonObject jsonObject){
+  StaticJsonDocument<192> doc;
 
   IPAddress ip = WiFi.localIP();
   IPAddress subMask = WiFi.subnetMask();
   IPAddress gateWay = WiFi.gatewayIP();
-         
-         
-            jsonObject["ssid"] = WiFi.SSID();
-            jsonObject["ip"] = ip.toString();
-            jsonObject["mac"] = WiFi.macAddress();
-            jsonObject["submask"] = subMask.toString();
-            jsonObject["gateway"] = gateWay.toString();
-            jsonObject["status"] = WiFi.status();
-            
+
+  doc["ssid"] = WiFi.SSID();
+  doc["ip"] = ip.toString();
+  doc["mac"] = WiFi.macAddress();
+  doc["submask"] = subMask.toString();
+  doc["gateway"] = gateWay.toString();
+  doc["status"] = WiFi.status();
+
+  //For debug
+  //serializeJsonPretty(doc, Serial);
+
+  return doc;
 }
 
+void WIFIModule::sendData(DynamicJsonDocument doc)
+{
+  
+  String json;
+  serializeJson(doc, json);
 
+  http.begin(this->host + this->path);
+  http.addHeader("Content-Type", "application/json");
 
+  int httpResponseCode = http.POST(json);
+
+  if (httpResponseCode > 0)
+  {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+  }
+  else
+  {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  
+  http.end(); //Close connection
+}
 
 void WIFIModule::headerWIFI()
 {

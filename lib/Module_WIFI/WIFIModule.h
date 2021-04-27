@@ -1,6 +1,5 @@
 
 
-
 #ifndef WIFIModule_h
 #define WIFIModule_h
 
@@ -9,13 +8,15 @@
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <IPAddress.h>
-
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
 //Contantes
 
 #define SSID_DEFAULT "javaUm"
 #define PASS_DEFAULT "12345678"
-
+#define HOST_DEFAULT "http://192.168.43.212:8080/"
+#define PATH_DEFAULT "api/v1/module"
 
 // 3 metodos
 
@@ -31,35 +32,33 @@
 // 5 - Status
 // 6 - SSID
 
-
-
-
-class WIFIModule: public IPAddress
+class WIFIModule : public IPAddress
 {
 private:
-
+    const char *_ssid;
+    const char *_pass;
 
 public:
-    
-    
-    
-    const char* _ssid;
-    const char* _pass;
     uint16_t count;
-
+    uint8_t httpResponseCode;
+    String payload;
+    HTTPClient http;
+    String host;
+    String path;
 
     //Contrutor
     WIFIModule();
+    WIFIModule(char *ssid, char *pass);
 
     //Metodos
     uint8_t connect();
+    void begin();
+    void begin(char *host, char *path);
     void checkConnection();
     DynamicJsonDocument buildJson();
-    void createJsonChild(JsonObject jsonObject);
     DynamicJsonDocument createJson();
-       
+    void sendData(DynamicJsonDocument doc);
     void headerWIFI();
-
 };
 
 #endif

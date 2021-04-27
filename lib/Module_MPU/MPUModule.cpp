@@ -38,7 +38,7 @@ DynamicJsonDocument MPUModule::createJson(){
  
   DynamicJsonDocument build = this->buildJson();
 
-    delay(DEFAULT_DELAY_MS);
+  //  delay(DEFAULT_DELAY_MS);
 
     return build;
 }
@@ -73,16 +73,20 @@ void MPUModule::dataMPU(){
 
 DynamicJsonDocument MPUModule::buildJson(){
 
-const size_t capacity = JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 4*JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(6);
-DynamicJsonDocument doc(capacity);
+StaticJsonDocument<192> doc;
 
-        
-//Cria o PAI 
-    JsonObject infor_MPU6050 =  doc.createNestedObject("infor_MPU6050");
+      JsonObject infor_MPU6050_ac =  doc.createNestedObject("accelerometer");
+            infor_MPU6050_ac["x"] = AcX;
+            infor_MPU6050_ac["y"] = AcY;
+            infor_MPU6050_ac["z"] = AcZ;
 
-//Criar os Filhos
+        JsonObject infor_MPU6050_gy =  doc.createNestedObject("gyroscope");
+            infor_MPU6050_gy["x"] = GyX;
+            infor_MPU6050_gy["y"] = GyY;
+            infor_MPU6050_gy["z"] = GyZ;
 
-this->createJsonChild(infor_MPU6050);
+        doc["temperature"] = Tmp/340.00+36.53;
+
 
 //For debug
 //serializeJsonPretty(doc, Serial);
@@ -91,23 +95,6 @@ return doc;
 
 }
 
-
-void MPUModule::createJsonChild(JsonObject jsonObject){
-
-         
-      JsonObject infor_MPU6050_ac =  jsonObject.createNestedObject("accelerometer");
-            infor_MPU6050_ac["x"] = AcX;
-            infor_MPU6050_ac["y"] = AcY;
-            infor_MPU6050_ac["z"] = AcZ;
-
-        JsonObject infor_MPU6050_gy =  jsonObject.createNestedObject("gyroscope");
-            infor_MPU6050_gy["x"] = GyX;
-            infor_MPU6050_gy["y"] = GyY;
-            infor_MPU6050_gy["z"] = GyZ;
-
-        jsonObject["temperature"] = Tmp/340.00+36.53;
-
-}
 
 
 

@@ -67,16 +67,39 @@ void GPSModule::customDelay(uint32_t MS){
 
 DynamicJsonDocument GPSModule::buildJson(){
 
-const size_t capacity = JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 4*JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(6);
-DynamicJsonDocument doc(capacity);
 
+StaticJsonDocument<512> doc;
 
-//Cria o PAI 
-JsonObject infor_gps = doc.createNestedObject("infor_gps");
+        JsonObject infor_gps_location = doc.createNestedObject("location");
+        infor_gps_location["lat"] = TinyGPSPlus::location.lat();
+        infor_gps_location["lng"] = TinyGPSPlus::location.lng();
+        infor_gps_location["rawlat"] = TinyGPSPlus::location.rawLat().negative ? "-" : "+";
+        infor_gps_location["rawlng"] = TinyGPSPlus::location.rawLng().negative ? "-" : "+";
 
-//Criar os Filhos
+        JsonObject infor_gps_date = doc.createNestedObject("date");
+        infor_gps_date["year"] = TinyGPSPlus::date.year();
+        infor_gps_date["month"] = TinyGPSPlus::date.month();
+        infor_gps_date["day"] = TinyGPSPlus::date.day();
 
-this->createJsonChild(infor_gps);
+        JsonObject infor_gps_time = doc.createNestedObject("time");
+        infor_gps_time["hour"] = TinyGPSPlus::time.hour()-3;
+        infor_gps_time["minute"] = TinyGPSPlus::time.minute();
+        infor_gps_time["second"] = TinyGPSPlus::time.second();
+
+        JsonObject infor_gps_speed = doc.createNestedObject("speed");
+        infor_gps_speed["mph"] = TinyGPSPlus::speed.mph();
+        infor_gps_speed["mps"] = TinyGPSPlus::speed.mps();
+        infor_gps_speed["kmph"] = TinyGPSPlus::speed.kmph();
+
+        JsonObject infor_gps_altitude = doc.createNestedObject("altitude");
+        infor_gps_altitude["meters"] = TinyGPSPlus::altitude.meters();
+        infor_gps_altitude["miles"] = TinyGPSPlus::altitude.miles();
+        infor_gps_altitude["kilometers"] = TinyGPSPlus::altitude.kilometers();
+
+        JsonObject infor_gps_satellites = doc.createNestedObject("satellites");
+        infor_gps_satellites["satellites"] = TinyGPSPlus::satellites.value();
+        infor_gps_satellites["hdop"] = TinyGPSPlus::hdop.value();
+
 
 //For debug
 //serializeJsonPretty(doc, Serial);
@@ -86,49 +109,6 @@ return doc;
 }
 
 
-void GPSModule::createJsonChild(JsonObject jsonObject){
-         
-        JsonObject infor_gps_location = jsonObject.createNestedObject("location");
-        infor_gps_location["lat"] = TinyGPSPlus::location.lat();
-        infor_gps_location["lng"] = TinyGPSPlus::location.lng();
-        infor_gps_location["rawlat"] = TinyGPSPlus::location.rawLat().negative ? "-" : "+";
-        infor_gps_location["rawlng"] = TinyGPSPlus::location.rawLng().negative ? "-" : "+";
-
-        JsonObject infor_gps_date = jsonObject.createNestedObject("date");
-        infor_gps_date["year"] = TinyGPSPlus::date.year();
-        infor_gps_date["month"] = TinyGPSPlus::date.month();
-        infor_gps_date["day"] = TinyGPSPlus::date.day();
-
-        JsonObject infor_gps_time = jsonObject.createNestedObject("time");
-        infor_gps_time["hour"] = TinyGPSPlus::time.hour()-3;
-        infor_gps_time["minute"] = TinyGPSPlus::time.minute();
-        infor_gps_time["second"] = TinyGPSPlus::time.second();
-
-        JsonObject infor_gps_speed = jsonObject.createNestedObject("speed");
-        infor_gps_speed["mph"] = TinyGPSPlus::speed.mph();
-        infor_gps_speed["mps"] = TinyGPSPlus::speed.mps();
-        infor_gps_speed["kmph"] = TinyGPSPlus::speed.kmph();
-
-        JsonObject infor_gps_altitude = jsonObject.createNestedObject("altitude");
-        infor_gps_altitude["meters"] = TinyGPSPlus::altitude.meters();
-        infor_gps_altitude["miles"] = TinyGPSPlus::altitude.miles();
-        infor_gps_altitude["kilometers"] = TinyGPSPlus::altitude.kilometers();
-
-        JsonObject infor_gps_satellites = jsonObject.createNestedObject("satellites");
-        infor_gps_satellites["satellites"] = TinyGPSPlus::satellites.value();
-        infor_gps_satellites["hdop"] = TinyGPSPlus::hdop.value();
-
-}
-
-
-
-
-
-
-// TinyGPSPlus GPS_Module::init()
-// {
-//     return TinyGPSPlus();
-// }
 
 /* void GPS_Module::headerGps(){
 
