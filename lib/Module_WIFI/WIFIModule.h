@@ -46,7 +46,7 @@ public:
     String host;
     String path;
 
-    //Contrutor
+    //Construtor
     WIFIModule();
     WIFIModule(char *ssid, char *pass);
 

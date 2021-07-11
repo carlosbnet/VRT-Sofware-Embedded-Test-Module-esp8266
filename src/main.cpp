@@ -124,4 +124,6 @@ void loop()
   Serial.print("Tempo de execução SD: ");
   Serial.println(lastTimeSD - firstTimeSD);
   Serial.println("--------------------------------------------------------------");
+
+  
 }
